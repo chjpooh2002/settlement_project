@@ -26,7 +26,7 @@ public class Product {
     private String title;
 
     @Column(nullable = false, precision = 10, scale = 2) 
-    private BigDecimal price;  // float이나 double 사용 시 소수 점 오류가 발생할 수 있어 소수점 연산의 정밀도를 보장하는 BigDecimal 사용
+    private BigDecimal price;  // float이나 double 사용 시 소수점 오류가 발생할 수 있어 소수점 연산의 정밀도를 보장하는 BigDecimal 사용
 
     @Lob
     private String description;

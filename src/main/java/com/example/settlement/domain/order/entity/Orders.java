@@ -44,7 +44,16 @@ public class Orders {  // 다중 판매자 이커머스 상황에서 구매자�
         this.createdAt = LocalDateTime.now();
     }
 
+    // 엔티티 내부의 도메인 비즈니스 메서드 고도화
     public void complete() {
-        this.orderStatus = OrderStatus.COMPLETED;
+        // 이미 취소되거나 완료된 주문은 다시 완료될 수 없음
+        if (this.orderStatus == OrderStatus.COMPLETED) {
+            throw new IllegalStateException("이미 결제가 완료된 주문입니다.");
+        }
+        if (this.orderStatus == OrderStatus.CANCELED) {
+            throw new IllegalStateException("이미 취소된 주문은 결제 완료 처리할 수 없습니다.");
+        }
+
+        this.orderStatus = OrderStatus.COMPLETED; // 상태 격상 (주문 완료 처리)
     }
 }

@@ -82,4 +82,16 @@ public class OrderService {
 
         return savedOrder.getId();
     }
+
+     // 결제 성공에 따른 주문 상태 변경 로직 (가상 PG 콜백 대응)
+
+    @Transactional // 데이터 상태를 변경하므로 쓰기 트랜잭션 활성화
+    public void completeOrderPayment(Long orderId) {
+        // 1. 대상 주문 조회
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
+
+        // 2. DDD 패턴: 서비스가 직접 필드를 수정하지 않고, 엔티티 객체에게 "너 결제 완료해"라고 명령 위임
+        order.complete(); // 영속성 컨텍스트의 Dirty Checking(변경 감지)으로 자동 반영
+    }
 }

@@ -50,4 +50,31 @@ public class Settlement {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    // 엔티티 내부 정산 계산 및 생성 팩토리 메서드 구현
+    public static Settlement createSettlement(OrderProduct orderProduct) {
+        // 1. 원본 판매 금액 계산 (단가 * 수량)
+        BigDecimal saleAmount = orderProduct.getOrderPrice()
+                .multiply(BigDecimal.valueOf(orderProduct.getQuantity()));
+
+        // 2. 플랫폼 수수료 계산 (판매 금액의 10%)
+        BigDecimal feeAmount = saleAmount.multiply(new BigDecimal("0.10"));
+
+        // 3. 수수료에 대한 부가세 계산 (수수료의 10%)
+        BigDecimal vatAmount = feeAmount.multiply(new BigDecimal("0.10"));
+
+        // 4. 판매자 최종 정산 지급액 계산 (판매 금액 - 수수료 - 부가세)
+        BigDecimal settlementAmount = saleAmount.subtract(feeAmount).subtract(vatAmount);
+
+        // 5. 정산 객체 반환
+        return Settlement.builder()
+                .seller(orderProduct.getProduct().getSeller()) // 상품 등록 프로
+                .orderProduct(orderProduct)
+                .saleAmount(saleAmount)
+                .feeAmount(feeAmount)
+                .vatAmount(vatAmount)
+                .settlementAmount(settlementAmount)
+                .settlementStatus(SettlementStatus.EXPECTED) // 초기엔 정산 예정 상태
+                .build();
+    }
 }
